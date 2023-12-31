@@ -445,7 +445,7 @@ onValue(ref(db, 'clicks'), (snapshot) => {
   document.getElementById('totalClicks').innerText = totalClicks;
 
   // totalClicksが100ごとに増えるたびに煩悩を追加
-  var index = Math.floor(totalClicks / 3) % bonnouList.length;
+  var index = Math.floor(totalClicks / 10) % bonnouList.length;
   var bonnou = bonnouList[index];
   bonnouNameDiv.textContent = bonnou.id + "番: " + bonnou.name;
   bonnouNakamiDiv.textContent = bonnou.nakami;

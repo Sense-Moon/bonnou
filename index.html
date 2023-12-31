@@ -489,21 +489,6 @@ function countdown() {
 // 1秒ごとに時刻とカウントダウンを更新
 setInterval(countdown, 1000);
 
-	// ダブルタップ禁止
-	window.addEventListener('touchstart', function (event) {
-	    if (event.touches.length > 1) {
-	        event.preventDefault();
-	    }
-	}, { passive: false });
-
-	let lastTouchEnd = 0;
-	window.addEventListener('touchend', function (event) {
-	    const now = Date.now();
-	    if (now - lastTouchEnd <= 300) {
-	        event.preventDefault();
-	    }
-	    lastTouchEnd = now;
-	}, false);
 
 
 

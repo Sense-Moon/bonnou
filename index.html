@@ -265,7 +265,11 @@ document.getElementById('send').addEventListener('click', function() {
     // Get the keys of the messages
     var keys = Object.keys(messages);
     // Sort the keys
-    keys.sort();
+    keys.sort((a, b) => {
+    var timestampA = parseInt(a.split('_')[1]);
+    var timestampB = parseInt(b.split('_')[1]);
+    return timestampA - timestampB;
+});
 
     // Reverse the order of keys
     keys.reverse();
@@ -283,6 +287,7 @@ document.getElementById('send').addEventListener('click', function() {
                         ('0' + timestamp.getHours()).slice(-2) + ':' +
                         ('0' + timestamp.getMinutes()).slice(-2) + ':' +
                         ('0' + timestamp.getSeconds()).slice(-2);
+
         messageDiv.textContent = formattedTimestamp + ': ' + username + ': ' + messages[keys[i]];
         messagesDiv.appendChild(messageDiv);
     }
@@ -445,7 +450,7 @@ onValue(ref(db, 'clicks'), (snapshot) => {
   document.getElementById('totalClicks').innerText = totalClicks;
 
   // totalClicksが100ごとに増えるたびに煩悩を追加
-  var index = Math.floor(totalClicks / 3) % bonnouList.length;
+  var index = Math.floor(totalClicks / 10) % bonnouList.length;
   var bonnou = bonnouList[index];
   bonnouNameDiv.textContent = bonnou.id + "番: " + bonnou.name;
   bonnouNakamiDiv.textContent = bonnou.nakami;
@@ -488,23 +493,6 @@ function countdown() {
 
 // 1秒ごとに時刻とカウントダウンを更新
 setInterval(countdown, 1000);
-
-	// ダブルタップ禁止
-	window.addEventListener('touchstart', function (event) {
-	    if (event.touches.length > 1) {
-	        event.preventDefault();
-	    }
-	}, { passive: false });
-
-	let lastTouchEnd = 0;
-	window.addEventListener('touchend', function (event) {
-	    const now = Date.now();
-	    if (now - lastTouchEnd <= 300) {
-	        event.preventDefault();
-	    }
-	    lastTouchEnd = now;
-	}, false);
-
 
 
     </script>

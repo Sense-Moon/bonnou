@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+  </head>
+  <style>
+
+
+.chatroom {
+  width: 80%;
+  height: 50%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow-y: scroll;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #000;
+  text-align: center;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#username, #message {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 40%;
+  height: 40%;
+}
+
+#send {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007BFF;
+  color: #fff;
+  cursor: pointer;
+  width: 30%;
+  height: 30%;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 24px;
+}
+
+#send:hover {
+  background-color: #0056b3;
+}
+
+#clickButton {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+#clickButton:hover {
+}
+
+#messages div {
+  border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+  word-wrap: break-word;
+  text-align: left;
+}
+
+body {
+  width: 100%;
+  text-align: center;
+  background-color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.jinja{
+    width: 80%;
+    height: 50vh;
+    background-color: #000;
+    background-image: url(jinja.png);
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+
+.kane-img {
+    width: 80%;
+    height: auto;
+}
+
+.count{
+width: 100%;
+
+}
+
+input[type="text"] {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 80%;
+  height: 60%;  /* エリアを縦に広くします */
+  font-size: 20px;  /* 文字の大きさを変更します */
+}
+
+#bonnou-name {
+  font-size: 1.5em;  /* 文字の大きさを大きくします */
+  color: #FF4500;  /* 文字の色をオレンジにします */
+  font-weight: bold;  /* 文字を太くします */
+  text-align: center;  /* テキストを中央揃えにします */
+  margin-top: 20px;  /* 上側の余白を追加します */
+}
+
+#bonnou-nakami {
+  font-size: 1.2em;  /* 文字の大きさを大きくします */
+  color: #000000;  /* 文字の色を黒にします */
+  text-align: center;  /* テキストを中央揃えにします */
+  margin-bottom: 20px;  /* 下側の余白を追加します */
+}
+
+
+
+/* アニメーション用のCSS */
+@keyframes shake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.kane-img {
+  display: inline-block;
+  transition: transform 0.5s;
+}
+
+.kane-img.active {
+  animation: shake 0.5s;
+  animation-iteration-count: infinite;
+}
+
+#newYearMessage {
+  font-size: 32px;  /* 文字の大きさを大きくします */
+  color: #FF0000;  /* 文字の色を赤にします */
+  font-weight: bold;  /* 文字を太くします */
+  text-align: center;  /* テキストを中央揃えにします */
+  animation: blink 2s infinite;  /* 点滅するアニメーションを追加します */
+}
+
+/* 点滅するアニメーション */
+@keyframes blink {
+  0% {opacity: 1;}
+  50% {opacity: 0;}
+  100% {opacity: 1;}
+}
+
+
+  </style>
+  <body>
+
+
+    <div class="jinja">
+
+        <button id="clickButton" class="kane">
+            <img src="kane.png" alt="kane" class="kane-img">
+        </button>
+          
+          
+
+    </div>
+
+    <div class="count">
+    <div id="bonnou-name"></div>
+    <div id="bonnou-nakami"></div>
+    <p>消した煩悩の総数: <span id="totalClicks">0</span></p>
+    
+    <div id="userClicks"></div>
+
+    </div>
+    <h2 id="currentTime"></h2>
+    <h2 id="countdown"></h2>
+    <h2 id="newYearMessage"></h2>
+    <div id="chatroom">
+      <input type="text" id="username" placeholder="なまえ">
+      <br>
+      <input type="text" id="message" placeholder="発言内容">
+      <br>
+      <button id="send">発言</button>
+      <div id="messages"></div>
+    </div>
+
+    <script type="module">
+      var firebaseConfig = {
+        apiKey: "AIzaSyAKvoX9I14uUOj7dYEItVXJGr-gNMz1xfc",
+        authDomain: "testgame-5940a.firebaseapp.com",
+        databaseURL: "https://testgame-5940a-default-rtdb.firebaseio.com",
+        projectId: "testgame-5940a",
+        storageBucket: "testgame-5940a.appspot.com",
+        messagingSenderId: "189198151711",
+        appId: "1:189198151711:web:4e67860e2222d2eb10252a",
+        measurementId: "G-Y0V1D8CHZJ"
+      };
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+      import { getDatabase, ref, set, onValue, get,push,update} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+
+      var app = initializeApp(firebaseConfig);
+      var auth = getAuth(app);
+      var db = getDatabase(app);
+
+
+// Send a message
+document.getElementById('send').addEventListener('click', function() {
+  var username = document.getElementById('username').value;
+  var message = document.getElementById('message').value;
+  var timestamp = Date.now();
+  var messageNode = ref(db, 'chat/message');
+
+  // Check if the username is empty
+  if (!username.trim()) {
+    alert('名前が入力されてないよ');
+    return;
+  }
+
+  get(messageNode).then((snapshot) => {
+    var messages = snapshot.val() ? JSON.parse(snapshot.val()) : {};
+    messages[username + '_' + timestamp] = message;
+    // Get the keys of the messages
+    var keys = Object.keys(messages);
+    // Sort the keys
+    keys.sort();
+    // If there are more than 20 messages, remove the oldest one
+    if (keys.length > 20) {
+      delete messages[keys[0]];
+    }
+    set(messageNode, JSON.stringify(messages));
+  });
+  document.getElementById('message').value = '';
+});
+
+
+      // Listen for new messages
+      let messageNode = ref(db, 'chat/message');
+    onValue(messageNode, (snapshot) => {
+    var messages = snapshot.val() ? JSON.parse(snapshot.val()) : {};
+    var messagesDiv = document.getElementById('messages');
+    messagesDiv.innerHTML = '';
+
+    // Get the keys of the messages
+    var keys = Object.keys(messages);
+    // Sort the keys
+    keys.sort();
+
+    // Reverse the order of keys
+    keys.reverse();
+
+    for (var i in keys) {
+        var messageDiv = document.createElement('div');
+        // Split the key into username and timestamp
+        var splitKey = keys[i].split('_');
+        var username = splitKey[0];
+        var timestamp = new Date(parseInt(splitKey[1]));
+        // Format the timestamp
+        var formattedTimestamp = timestamp.getFullYear() + '/' +
+                                (timestamp.getMonth() + 1) + '/' +
+                                timestamp.getDate() + ' ' +
+                                timestamp.getHours() + ':' +
+                                timestamp.getMinutes() + ':' +
+                                timestamp.getSeconds();
+        messageDiv.textContent = formattedTimestamp + ': ' + username + ': ' + messages[keys[i]];
+        messagesDiv.appendChild(messageDiv);
+    }
+    });
+
+// Click button
+document.getElementById('clickButton').addEventListener('click', function() {
+  var username = document.getElementById('username').value;
+  // If the username is empty, use a default name
+  if (!username.trim()) {
+    username = '名無しさん';
+  }
+  var clicksRef = ref(db, 'clicks/' + username);
+  get(clicksRef).then((snapshot) => {
+    var clicks = snapshot.val() || 0;
+    set(clicksRef, clicks + 1);
+  });
+  // Create a new Audio object for each click
+  var audio = new Audio('kane.mp3');
+  audio.play();
+
+  // アニメーションの追加
+  var img = document.querySelector('.kane-img');
+  img.classList.add('active');
+  setTimeout(function() {
+    img.classList.remove('active');
+  }, 500);
+});
+
+
+
+// 煩悩のリスト
+// 煩悩のリスト
+var bonnouList = [
+  {id: 1, name: '苦締貪(くたいとん)', nakami: '執着する心'},
+  {id: 2, name: '苦締瞋(くたいしん)', nakami: '許せない怒り'},
+  {id: 3, name: '苦締癡(くたいち)', nakami: '道理が分からず愚痴を言う'},
+  {id: 4, name: '苦締慢(くたいまん)', nakami: 'おごり、高ぶり'},
+  {id: 5, name: '苦締疑(くたいぎ)', nakami: '正しい事を疑う'},
+  {id: 6, name: '苦締有身見(くたいうけんしん)', nakami: '身体への執着'},
+  {id: 7, name: '苦締辺執見(くたいへんじっけん)', nakami: '極端な思考'},
+  {id: 8, name: '苦締邪見(くたいじゃけん)', nakami: '因果応報を知らない'},
+  {id: 9, name: '苦締見取見(くたいけんしゅけん)', nakami: '間違いを正しいと思い込む'},
+  {id: 10, name: '苦締戒禁取見(くたいかいごんしゅけん)', nakami: '誤った考えを信じる'},
+  {id: 11, name: '集締貪(じったいとん)', nakami: '欲望'},
+  {id: 12, name: '集締瞋(じったいしん)', nakami: '憎しみ'},
+  {id: 13, name: '集締癡(じったいち)', nakami: '悪行を行う'},
+  {id: 14, name: '集締慢(じったいまん)', nakami: '他人に誇りたがる'},
+  {id: 15, name: '集締疑(じったいぎ)', nakami: '真実を疑う'},
+  {id: 16, name: '集締邪見(じったいじゃけん)', nakami: '果報は無いと思う'},
+  {id: 17, name: '集締見取見(じったいけんしゅけん)', nakami: '自分が最も優れていると思う'},
+  {id: 18, name: '滅締貪(めったいとん)', nakami: '激しい欲求'},
+  {id: 19, name: '滅締癡(めったいち)', nakami: '無知による愚行'},
+  {id: 20, name: '滅締慢(めったいまん)', nakami: '傲慢'},
+  {id: 21, name: '滅締疑(めったいぎ)', nakami: '正しいことを信じられない'},
+  {id: 22, name: '滅締邪見(めったいじゃけん)', nakami: '因果関係を認めない'},
+  {id: 23, name: '滅締見取見(めったいけんしゅけん)', nakami: '誤った見解を信じ込む'},
+  {id: 24, name: '道締貪 (どうたいとん)', nakami: '何かを求める心'},
+  {id: 25, name: '道締癡(どうたいち)', nakami: '愚かな行為'},
+  {id: 26, name: '道締慢(どうたいまん)', nakami: '自慢したがる'},
+  {id: 27, name: '道締疑(どうたいぎ )', nakami: '真実を信じれない'},
+  {id: 28, name: '道締邪見(どうたいじゃけん)', nakami: '果報が自分に帰ってくると知らない'},
+  {id: 29, name: '道締見取見(どうたいけんしゅけん)', nakami: '自分が正しく、他が間違っている'},
+  {id: 30, name: '道締戒禁取見(どうたいかいごんしゅけん)', nakami: '誤った見解に固執する'},
+  {id: 31, name: '色界苦締貪(しきかいくたいとん)', nakami: '魂からの欲望'},
+  {id: 32, name: '色界苦締癡(しきかいつたいち)', nakami: '愚かな行為'},
+  {id: 33, name: '色界苦締慢(しきかいくたいまん)', nakami: '自身の凄さを誇りたがる'},
+  {id: 34, name: '色界苦締疑(しきかいくたいぎ)', nakami: '正しい教えを疑う'},
+  {id: 35, name: '色界苦締有身見(しきかいくたいうしんけん)', nakami: '身体への執着'},
+  {id: 36, name: '色界苦締辺執見(しきかいくたいへんじっけん)', nakami: '極端な考え方'},
+  {id: 37, name: '色界苦締邪見(しきかいくたいじゃけん)', nakami: '因果応報を知らない'},
+  {id: 38, name: '色界苦締見取見(しきかいくたいけんしゅけん)', nakami: '自分だけが正しい'},
+  {id: 39, name: '色界苦締戒禁取見(しきかいくたいかいごんしゅけん)', nakami: '誤った考えを信じる'},
+  {id: 40, name: '色界集締貪(しきかいじったいとん)', nakami: '必要以上に欲する'},
+  {id: 41, name: '色界集締癡 (しきかいじったいち)', nakami: '愚かな行い'},
+  {id: 42, name: '色界集締慢 (しきかいじったいまん )', nakami: '他者に誇りたがる'},
+  {id: 43, name: '色界集締疑(しきかいじったいぎ)', nakami: '正しい事を信じられない'},
+  {id: 44, name: '色界集締邪見(しきかいじったいじゃけん)', nakami: '果報は無いと思う'},
+  {id: 45, name: '色界集締見取見(しきかいじったいけんしゅけん)', nakami: '自分が最も優れていると思う'},
+  {id: 46, name: '色界滅締貪(しきかいめったいとん)', nakami: '欲が湧いてくる'},
+  {id: 47, name: '色界滅締癡 (しきかいめったいち)', nakami: '愚行'},
+  {id: 48, name: '色界滅締貪(しきかいめったいとん)',nakami:'欲が湧いてくる'},
+  {id: 49, name: '色界滅締慢(しきかいめったいまん)', nakami: '優越感'},
+  {id: 50, name: '色界滅締疑(むしきかいめったいぎ)', nakami: '正しいことを信じられない'},
+  {id: 51, name: '色界滅締邪見(むしきかいめったいじゃけん)', nakami: '因果応報を認めない'},
+  {id: 52, name: '色界滅締見取見(むしきかいめったいけんしゅけん)', nakami: '誤った見解を信じ込む'},
+  {id: 53, name: '色界道締貪(むしきかいどうたいとん)', nakami: '欲求'},
+  {id: 54, name: '色界道締癡(むしきかいどうたいち)', nakami: '悪行'},
+  {id: 55, name: '色界道締慢(むしきかいどうたいまん)', nakami: '悪意'},
+  {id: 56, name: '色界道締疑(むしきかいどうたいぎ)', nakami: '疑心'},
+  {id: 57, name: '色界道締邪見(むしきかいどうたいじゃけん)', nakami: '果報が自分に帰ってくると知らない'},
+  {id: 58, name: '色界道締戒見取見(むしきかいどうたいけんしゅけん)', nakami: '間違いに執着する'},
+  {id: 59, name: '色界道締戒禁取見 (むしきかいだうたいかいごんしゅけん)', nakami: '妄信'},
+  {id: 60, name: '無色界苦締貪(むしきかいくたいとん)', nakami: '精神的な欲望'},
+  {id: 61, name: '無色界苦締癡 (むしきかいくたいち)', nakami: '怒りからの憎しみ'},
+  {id: 62, name: '無色界苦締慢 (むしきかいくたいまん)', nakami: '自分が優れている事を知らしめたい'},
+  {id: 63, name: '無色界苦締疑(むしきかいくたいぎ)', nakami: '正しい道を信じれない'},
+  {id: 64, name: '無色界苦締有身見 (むしきかいくたいうしんけん)', nakami: '心身を思い通りにできる'},
+  {id: 65, name: '無色界苦締辺執見(むしきかいくたいへんじっけん)', nakami: 'バランスを欠いた思考'},
+  {id: 66, name: '無色界苦締邪見(むしきかいくたいじゃけん)', nakami: '因果応報を知らない'},
+  {id: 67, name: '無色界苦締見取見(むしきかいくたいけんしゅけん)', nakami: '自分だけが正しい'},
+  {id: 68, name: '無色界苦締戒禁取見(むしきかいくたいかいごんしゅけん)', nakami: '誤った考えを信じる'},
+  {id: 69, name: '無色界集締貪(むしきかいじったいとん)', nakami: '魂からの激しい欲望'},
+  {id: 70, name: '無色界集締癡 (むしきかいじったいち)', nakami: '愚かな行為'},
+  {id: 71, name: '無色界集締慢 (むしきかいじったいまん )', nakami: '他者に誇りたがる'},
+  {id: 72, name: '無色界集締疑(しきかいじったいぎ)', nakami: '正しい事を信じられない'},
+  {id: 73, name: '無色界集締邪見(しきかいじったいじゃけん)', nakami: '果報は無いと思う'},
+  {id: 74, name: '無色界集締見取見(しきかいじったいけんしゅけん)', nakami: '自分が最も優れていると思う'},
+  {id: 75, name: '無色界滅締貪(むしきかいめったいとん)', nakami: '欲が湧いてくる'},
+  {id: 76, name: '無色界滅締癡 (むしきかいめったいち)', nakami: '愚行'},
+  {id: 77, name: '無色界滅締慢(むしきかいめったいまん)', nakami: '優越感'},
+  {id: 78, name: '無色界滅締疑(むしきかいめったいぎ)', nakami: '正しいことを信じられない'},
+  {id: 79, name: '無色界滅締邪見(むしきかいめったいじゃけん)', nakami: '因果応報を認めない'},
+  {id: 80, name: '無色界滅締見取見(むしきかいめったいけんしゅけん)', nakami: '誤った見解を信じ込む'},
+  {id: 81, name: '無色界道締貪(むしきかいどうたいとん)', nakami: '欲求'},
+  {id: 82, name: '無色界道締癡(むしきかいどうたいち)', nakami: '悪行'},
+  {id: 83, name: '無色界道締慢(むしきかいどうたいまん)', nakami: '悪意'},
+  {id: 84, name: '無色界道締疑(むしきかいどうたいぎ)', nakami: '疑心'},
+  {id: 85, name: '無色界道締邪見(むしきかいどうたいじゃけん)', nakami: '果報が自分に帰ってくると知らない'},
+  {id: 86, name: '無色界道締戒見取見(むしきかいどうたいけんしゅけん)', nakami: '間違いに執着する'},
+  {id: 87, name: '無色界道締戒禁取見 (むしきかいだうたいかいごんしゅけん)', nakami: '妄信'},
+  {id: 88, name: '修惑欲界貪(しゅわくよくかいとん)', nakami: '生来持っている欲望'},
+  {id: 89, name: '修惑欲界瞋 (しゅわくよくかいしん)', nakami: '生来持っている怒り'},
+  {id: 90, name: '修惑欲界瞋 (しゅわくよくかいしん)', nakami: '生来持っている怒り'},
+  {id: 91, name: '修惑欲界癡 (しゅわくよくかいち)', nakami: '生来持っている悪行'},
+  {id: 92, name: '修惑欲界慢(しゅわくよくかいまん)', nakami: '自分が優れている事を知らしめたい'},
+  {id: 93, name: '修惑欲界疑(しゅわくよくかいぎ)', nakami: '正しい道を信じれない'},
+  {id: 94, name: '修惑欲界有身見 (しゅわくよくかいうしんけん)', nakami: '心身を思い通りにできる'},
+  {id: 95, name: '修惑欲界辺執見(しゅわくよくかいへんじっけん)', nakami: 'バランスを欠いた思考'},
+  {id: 96, name: '修惑欲界邪見(しゅわくよくかいじゃけん)', nakami: '因果応報を知らない'},
+  {id: 97, name: '修惑欲界見取見(しゅわくよくかいけんしゅけん)', nakami: '自分だけが正しい'},
+  {id: 98, name: '修惑欲界戒禁取見(しゅわくよくかいかいごんしゅけん)', nakami: '誤った考えを信じる'},
+  {id: 99, name: '修惑色界貪(しゅわくしきかいとん)', nakami: '必要以上に欲する'},
+  {id: 100, name: '修惑色界癡 (しゅわくしきかいち)', nakami: '愚かな行為'},
+  {id: 101, name: '修惑色界慢 (しゅわくしきかいまん )', nakami: '他者に誇りたがる'},
+  {id: 102, name: '修惑色界疑(しゅわくしきかいぎ)', nakami: '正しい事を信じられない'},
+  {id: 103, name: '修惑色界邪見(しゅわくしきかいじゃけん)', nakami: '果報は無いと思う'},
+  {id: 104, name: '修惑色界見取見(しゅわくしきかいけんしゅけん)', nakami: '自分が最も優れていると思う'},
+  {id: 105, name: '修惑色界戒禁取見 (しゅわくしきかいかいごんしゅけん)', nakami: '妄信'},
+  {id: 106, name: '修惑無色界貪(しゅわくむしきかいとん)', nakami: '精神的な欲望'},
+  {id: 107, name: '修惑無色界癡 (しゅわくむしきかいち)', nakami: '怒りからの憎しみ'},
+  {id: 108, name: '修惑無色界慢 (しゅわくむしきかいまん)', nakami: '自分が優れている事を知らしめたい'}
+];
+// 煩悩の名前と内容を表示する要素
+var bonnouNameDiv = document.getElementById('bonnou-name');
+var bonnouNakamiDiv = document.getElementById('bonnou-nakami');
+
+// Display total clicks
+onValue(ref(db, 'clicks'), (snapshot) => {
+  var clicks = snapshot.val();
+  var totalClicks = 0;
+  var userClicksDiv = document.getElementById('userClicks');
+  userClicksDiv.innerHTML = '';
+  for (var username in clicks) {
+    totalClicks += clicks[username];
+    var userClicksP = document.createElement('p');
+    userClicksP.textContent = username + 'さん: ' + clicks[username] +'個の煩悩を消しました';
+    userClicksDiv.appendChild(userClicksP);
+  }
+  document.getElementById('totalClicks').innerText = totalClicks;
+
+  // totalClicksが100ごとに増えるたびに煩悩を追加
+  var index = Math.floor(totalClicks / 3) % bonnouList.length;
+  var bonnou = bonnouList[index];
+  bonnouNameDiv.textContent = bonnou.id + "番: " + bonnou.name;
+  bonnouNakamiDiv.textContent = bonnou.nakami;
+
+  // Create a new Audio object for each click
+  var audio = new Audio('kane.mp3');
+  audio.play();
+});
+
+
+
+// 現在の時刻を表示する要素
+var currentTimeDiv = document.getElementById('currentTime');
+// 2024/1/1までの残り時間を表示する要素
+var countdownDiv = document.getElementById('countdown');
+// 新年のメッセージを表示する要素
+var newYearMessageDiv = document.getElementById('newYearMessage');
+
+// 時刻とカウントダウンを更新する関数
+function countdown() {
+  // 現在の時刻
+  var now = new Date();
+  // 2024/1/1の時刻
+  var newYear = new Date(2024, 0, 1);
+  // 2024/1/1までの残り時間（ミリ秒）
+  var remaining = newYear - now;
+  // 残り時間（秒）
+  var remainingSeconds = Math.floor(remaining / 1000);
+
+  // 現在の時刻を表示
+  currentTimeDiv.textContent = '現在の時刻: ' + now.toLocaleString();
+  // 2024/1/1までの残り時間を表示
+  countdownDiv.textContent = '年明けまであと ' + remainingSeconds + ' 秒';
+
+  // 2024/1/1になったらメッセージを表示
+  if (now >= newYear) {
+    newYearMessageDiv.textContent = '明けましておめでとう！';
+  }
+}
+
+// 1秒ごとに時刻とカウントダウンを更新
+setInterval(countdown, 1000);
+
+	// ダブルタップ禁止
+	window.addEventListener('touchstart', function (event) {
+	    if (event.touches.length > 1) {
+	        event.preventDefault();
+	    }
+	}, { passive: false });
+
+	let lastTouchEnd = 0;
+	window.addEventListener('touchend', function (event) {
+	    const now = Date.now();
+	    if (now - lastTouchEnd <= 300) {
+	        event.preventDefault();
+	    }
+	    lastTouchEnd = now;
+	}, false);
+
+
+
+    </script>
+  </body>
+</html>

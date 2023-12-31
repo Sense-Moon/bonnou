@@ -265,7 +265,7 @@ document.getElementById('send').addEventListener('click', function() {
     // Get the keys of the messages
     var keys = Object.keys(messages);
     // Sort the keys
-keys.sort((a, b) => {
+    keys.sort((a, b) => {
     var timestampA = parseInt(a.split('_')[1]);
     var timestampB = parseInt(b.split('_')[1]);
     return timestampA - timestampB;
@@ -282,11 +282,12 @@ keys.sort((a, b) => {
         var timestamp = new Date(parseInt(splitKey[1]));
         // Format the timestamp
         var formattedTimestamp = timestamp.getFullYear() + '/' +
-                                (timestamp.getMonth() + 1) + '/' +
-                                timestamp.getDate() + ' ' +
-                                timestamp.getHours() + ':' +
-                                timestamp.getMinutes() + ':' +
-                                timestamp.getSeconds();
+                        (timestamp.getMonth() + 1) + '/' +
+                        timestamp.getDate() + ' ' +
+                        ('0' + timestamp.getHours()).slice(-2) + ':' +
+                        ('0' + timestamp.getMinutes()).slice(-2) + ':' +
+                        ('0' + timestamp.getSeconds()).slice(-2);
+
         messageDiv.textContent = formattedTimestamp + ': ' + username + ': ' + messages[keys[i]];
         messagesDiv.appendChild(messageDiv);
     }
@@ -492,8 +493,6 @@ function countdown() {
 
 // 1秒ごとに時刻とカウントダウンを更新
 setInterval(countdown, 1000);
-
-
 
 
     </script>

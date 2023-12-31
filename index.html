@@ -265,7 +265,11 @@ document.getElementById('send').addEventListener('click', function() {
     // Get the keys of the messages
     var keys = Object.keys(messages);
     // Sort the keys
-    keys.sort();
+keys.sort((a, b) => {
+    var timestampA = parseInt(a.split('_')[1]);
+    var timestampB = parseInt(b.split('_')[1]);
+    return timestampA - timestampB;
+});
 
     // Reverse the order of keys
     keys.reverse();
